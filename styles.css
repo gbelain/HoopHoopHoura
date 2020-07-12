@@ -9,6 +9,25 @@ h1 {
   color: "#04406f";
   text-align: center;
 }
+
+ul {
+  font-family: monospace;
+}
+
+li {
+  list-style: circle;
+}
+
+.list {
+  list-style: square;
+}
+
+#date {
+  font-size: 12px;
+  font-style: italic;
+  font-weight: bold;
+}
+
 .center {
   display: block;
   margin-left: auto;
