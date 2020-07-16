@@ -11,7 +11,7 @@ window.addEventListener("load", async (e) => {
   }
 });
 
-let today = new Date();
-let formatDate = today.toDateString();
-let selectedElement = document.getElementById("date");
-selectedElement.innerHTML = formatDate;
+// let today = new Date();
+// let formatDate = today.toDateString();
+// let selectedElement = document.getElementById("date");
+// selectedElement.innerHTML = formatDate;
