@@ -6,11 +6,15 @@ html body {
   background-size: 100%;
 }
 
+html img {
+  margin-left: 87%;
+}
+
 html h1 {
   font-size: 200%;
   font-weight: 700;
   color: aliceblue;
-  margin-left: 17%;
+  margin-left: 14%;
   margin-top: 109%;
 }
 
