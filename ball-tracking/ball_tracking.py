@@ -21,19 +21,20 @@ def findHoopLocation(vs):
     boleen, frame = vs.read()
 
     frame = imutils.resize(frame, width=600)
-    cv2.imwrite("la fameuse frame"+'.jpg', frame)
+    cv2.imwrite("la frame de base"+'.jpg', frame)
 
     blurred = cv2.GaussianBlur(frame, (11, 11), 0)
-    cv2.imwrite("le blurred"+'.jpg', blurred)
+    cv2.imwrite("la frame blurred"+'.jpg', blurred)
 
     hsv = cv2.cvtColor(frame, cv2.COLOR_BGR2HSV)
-    cv2.imwrite("le hsv"+'.jpg', hsv)
+    cv2.imwrite("la frame hsv"+'.jpg', hsv)
 
     mask = cv2.inRange(hsv, redLower, redUpper)
     cv2.imwrite("le mask"+'.jpg', mask)
 
-    # mask = cv2.erode(mask, None, iterations=2)
-    # mask = cv2.dilate(mask, None, iterations=2)
+    mask = cv2.erode(mask, None, iterations=2)
+    mask = cv2.dilate(mask, None, iterations=2)
+    cv2.imwrite("le mask apres traitement"+'.jpg', mask)
 
     # cnts = cv2.findContours(
     #     mask.copy(), cv2.RETR_EXTERNAL, cv2.CHAIN_APPROX_SIMPLE)
@@ -127,7 +128,7 @@ orangeLower = (7, 100, 20)
 orangeUpper = (22, 250, 255)
 
 redLower = (0, 150, 20)
-redUpper = (8, 255, 255)
+redUpper = (5, 255, 255)
 
 dequeLength = 64
 videoName = "test_video.MOV"
@@ -149,7 +150,6 @@ time.sleep(2.0)
 
 # hoopLocation = findHoopLocation(vs)
 
-# keep looping
 while True:
     # grab the current frame
     frame = vs.read()
@@ -168,7 +168,5 @@ while True:
 
 # release the video/camera
 vs.release()
-
-
 # close all windows
 cv2.destroyAllWindows()
