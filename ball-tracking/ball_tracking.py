@@ -67,21 +67,19 @@ def findHoopCenterLocation(vs):
         return None
 
 
-def findAndShowBallLocation(frame, orangeLower, orangeUpper):
+def findBallLocation(frame, orangeLower, orangeUpper):
     global pts
     # resize the frame, blur it, and convert it to the HSV
     # color space
     frame = imutils.resize(frame, width=600)
     blurred = cv2.GaussianBlur(frame, (11, 11), 0)
     hsv = cv2.cvtColor(blurred, cv2.COLOR_BGR2HSV)
-
     # construct a mask for the color "orange", then perform
     # a series of dilations and erosions to remove any small
     # blobs left in the mask
     mask = cv2.inRange(hsv, orangeLower, orangeUpper)
     mask = cv2.erode(mask, None, iterations=2)
     mask = cv2.dilate(mask, None, iterations=2)
-
     # find contours in the mask and initialize the current
     # (x, y) center of the ball
     cnts = cv2.findContours(mask.copy(), cv2.RETR_EXTERNAL,
@@ -126,11 +124,24 @@ def findAndShowBallLocation(frame, orangeLower, orangeUpper):
     cv2.imshow("Frame", frame)
 
 
+def IsTakingAShot(xBall):
+    global shotTaken
+    global shotCount
+    if xBall < xHoop:
+        if not shotTaken:
+            shotTaken = True
+            shotCount += 1
+    else:
+        if shotTaken:
+            shotTaken = False
+    return None
+
+
 ######################################################################################
 
-# define the lower and upper boundaries of the "orange"
-# ball in the HSV color space, then initialize the
-# list of tracked points
+    # define the lower and upper boundaries of the "orange"
+    # ball in the HSV color space, then initialize the
+    # list of tracked points
 orangeLower = (7, 100, 20)
 orangeUpper = (22, 250, 255)
 
@@ -143,19 +154,16 @@ videoName = "test_video.MOV"
 pts = deque(maxlen=dequeLength)
 
 vsHoop = cv2.VideoCapture(videoName)
-
+# allow the camera or video file to warm up
 time.sleep(2.0)
-
 (xHoop, yHoop) = findHoopCenterLocation(vsHoop)
 vsHoop.release()
 
 vs = cv2.VideoCapture(videoName)
-
-# allow the camera or video file to warm up
 time.sleep(2.0)
 
-# hoopLocation = findHoopLocation(vs)
-
+shotTaken = False
+shotCount = 0
 while True:
     # grab the current frame
     frame = vs.read()
@@ -165,7 +173,7 @@ while True:
     # then we have reached the end of the video
     if frame is None:
         break
-    findAndShowBallLocation(frame, orangeLower, orangeUpper)
+    findBallLocation(frame, orangeLower, orangeUpper)
 
     key = cv2.waitKey(1) & 0xFF
     # if the 'q' key is pressed, stop the loop
