@@ -15,12 +15,10 @@ import time
 ######################################################################################
 
 
-def findHoopCenterLocation(vs):
-    vs.set(1, 5)
-    boleen, frame = vs.read()
-    frame = imutils.resize(frame, width=600)
+def findHoopCenterLocation(frame):
+    frameCopy = imutils.resize(frame.copy(), width=600)
     # cv2.imwrite("la frame de base"+'.jpg', frame)
-    blurred = cv2.GaussianBlur(frame, (11, 11), 0)
+    blurred = cv2.GaussianBlur(frameCopy, (11, 11), 0)
     # cv2.imwrite("la frame blurred"+'.jpg', blurred)
     hsv = cv2.cvtColor(blurred, cv2.COLOR_BGR2HSV)
     # cv2.imwrite("la frame hsv"+'.jpg', hsv)
@@ -108,52 +106,51 @@ def findBallLocation(frame, orangeLower, orangeUpper):
 def IsTakingAShot(xBall):
     global shotTaken
     global shotTakenCount
-    if xBall < hoopLocation[0]:
+    global thisShotWasMade
+    if xBall < hoopLocation[0]-75:
         if not shotTaken:
             shotTaken = True
             shotTakenCount += 1
-    else:
+    elif xBall > hoopLocation[0]+60:
         if shotTaken:
             shotTaken = False
+            thisShotWasMade = False
     return None
 
 
 def ShotMade(ballCenter, hoopLocation):
     global shotMadeCount
-    if (ballCenter[1] > hoopLocation[1]-8 and ballCenter[1] < hoopLocation[1]+8) and (ballCenter[0] > hoopLocation[0]-2 and ballCenter[0] < hoopLocation[0]+2):
+    global thisShotWasMade
+    if (ballCenter[1] > hoopLocation[1]-13 and ballCenter[1] < hoopLocation[1]+13) and (ballCenter[0] > hoopLocation[0]-4 and ballCenter[0] < hoopLocation[0]+10) and not thisShotWasMade:
         shotMadeCount += 1
+        thisShotWasMade = True
+        print "panier marque"
     return None
 
 
 ######################################################################################
-
-    # define the lower and upper boundaries of the "orange"
-    # ball in the HSV color space, then initialize the
-    # list of tracked points
+# define the lower and upper boundaries of the "orange"
+# ball in the HSV color space, then initialize the
+# list of tracked points
 orangeLower = (7, 100, 20)
 orangeUpper = (22, 250, 255)
 
 redLower = (0, 100, 20)
 redUpper = (10, 255, 255)
 
-dequeLength = 64
+dequeLength = 20
 videoName = "test_video.MOV"
-
-pts = deque(maxlen=dequeLength)
-
-vsHoop = cv2.VideoCapture(videoName)
-# allow the camera or video file to warm up
-time.sleep(2.0)
-hoopLocation = findHoopCenterLocation(vsHoop)
-vsHoop.release()
 
 vs = cv2.VideoCapture(videoName)
 time.sleep(2.0)
 
+pts = deque(maxlen=dequeLength)
 shotTaken = False
 shotTakenCount = 0
 shotMadeCount = 0
-
+hoopLocation = None
+whileCount = 0
+thisShotWasMade = False
 
 while True:
     # grab the current frame
@@ -164,10 +161,20 @@ while True:
     # then we have reached the end of the video
     if frame is None:
         break
+    hoopLocation = findHoopCenterLocation(frame)
     frame, ballCenter = findBallLocation(frame, orangeLower, orangeUpper)
 
     # update the points queue
-    # raw_input("Press Enter to continue...")
+
+    if whileCount >= 3 and ballCenter is not None and pts[0] is not None:
+        positionBallonPrec = pts[0]
+        if positionBallonPrec != ballCenter:
+            trajectoireBallon = (pow((ballCenter[1]-positionBallonPrec[1]), 2) +
+                                 pow((ballCenter[0]-positionBallonPrec[0]), 2))**0.5
+            # print abs(trajectoireBallon)
+            if abs(trajectoireBallon) > 120:
+                ballCenter = positionBallonPrec
+
     pts.appendleft(ballCenter)
 
     # loop over the set of tracked points
@@ -176,7 +183,6 @@ while True:
         # them
         if pts[i - 1] is None or pts[i] is None:
             continue
-
         # otherwise, compute the thickness of the line and
         # draw the connecting lines
         thickness = int(np.sqrt(dequeLength / float(i + 1)) * 2.5)
@@ -187,21 +193,33 @@ while True:
         ShotMade(ballCenter, hoopLocation)
 
     if shotTaken:
-        cv2.putText(frame, " en train de tirer", (435, 50), cv2.FONT_HERSHEY_SIMPLEX,
+        cv2.putText(frame, " en train de tirer", (425, 50), cv2.FONT_HERSHEY_SIMPLEX,
                     0.6, (255, 255, 255), 2)
     # show the frame to our screen
+    cv2.line(frame, (hoopLocation[0], hoopLocation[1]-13),
+             (hoopLocation[0], hoopLocation[1]+13), (255, 0, 0), 5)
+    # cv2.line(frame, (hoopLocation[0]-75, 1),
+    #          (hoopLocation[0]-75, 500), (0, 0, 255), 2)
+    # cv2.line(frame, (hoopLocation[0]+60, 1),
+    #  (hoopLocation[0]+60, 500), (0, 0, 255), 2)
+    if thisShotWasMade:
+        cv2.putText(frame, "PANIER MARQUE !!", (420, 70), cv2.FONT_HERSHEY_SIMPLEX,
+                    0.6, (0, 0, 255), 2)
     cv2.imshow("Frame", frame)
 
     key = cv2.waitKey(1) & 0xFF
+
     # if the 'q' key is pressed, stop the loop
     if key == ord("q"):
         break
 
+    whileCount += 1
 
 # release the video/camera
 vs.release()
 # close all windows
 cv2.destroyAllWindows()
+
 
 print "tirs effectues :" + str(shotTakenCount)
 print "tirs reussis :" + str(shotMadeCount)
