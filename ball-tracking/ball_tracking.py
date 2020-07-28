@@ -1,7 +1,6 @@
 # USAGE
 # python ball_tracking.py --video ball_tracking_example.mp4
 # python ball_tracking.py
-
 # import the necessary packages
 # list-like data structure for storing the past x,y locations of the ball
 from collections import deque
@@ -56,11 +55,11 @@ def findHoopCenterLocation(vs):
         M = cv2.moments(circleContour)
         cX = int(M["m10"] / M["m00"])
         cY = int(M["m01"] / M["m00"])
-        cv2.drawContours(frame, [circleContour], -1, (0, 255, 0), 2)
-        cv2.circle(frame, (cX+16, cY-14), 3, (255, 255, 255), -1)
-        # show the image
-        cv2.imshow("les contours", frame)
-        cv2.waitKey(0)
+        # cv2.drawContours(frame, [circleContour], -1, (0, 255, 0), 2)
+        # cv2.circle(frame, (cX+16, cY-14), 3, (255, 255, 255), -1)
+        # # show the image
+        # cv2.imshow("les contours", frame)
+        # cv2.waitKey(0)
         return (cX+16, cY-14)
     else:
         print "pas de contour trouve"
@@ -84,7 +83,7 @@ def findBallLocation(frame, orangeLower, orangeUpper):
     cnts = cv2.findContours(mask.copy(), cv2.RETR_EXTERNAL,
                             cv2.CHAIN_APPROX_SIMPLE)
     cnts = imutils.grab_contours(cnts)
-    center = None
+    ballCenter = None
 
     # only proceed if at least one contour was found
     if len(cnts) > 0:
@@ -108,14 +107,21 @@ def findBallLocation(frame, orangeLower, orangeUpper):
 
 def IsTakingAShot(xBall):
     global shotTaken
-    global shotCount
-    if xBall < xHoop:
+    global shotTakenCount
+    if xBall < hoopLocation[0]:
         if not shotTaken:
             shotTaken = True
-            shotCount += 1
+            shotTakenCount += 1
     else:
         if shotTaken:
             shotTaken = False
+    return None
+
+
+def ShotMade(ballCenter, hoopLocation):
+    global shotMadeCount
+    if (ballCenter[1] > hoopLocation[1]-8 and ballCenter[1] < hoopLocation[1]+8) and (ballCenter[0] > hoopLocation[0]-2 and ballCenter[0] < hoopLocation[0]+2):
+        shotMadeCount += 1
     return None
 
 
@@ -138,14 +144,15 @@ pts = deque(maxlen=dequeLength)
 vsHoop = cv2.VideoCapture(videoName)
 # allow the camera or video file to warm up
 time.sleep(2.0)
-(xHoop, yHoop) = findHoopCenterLocation(vsHoop)
+hoopLocation = findHoopCenterLocation(vsHoop)
 vsHoop.release()
 
 vs = cv2.VideoCapture(videoName)
 time.sleep(2.0)
 
 shotTaken = False
-shotCount = 0
+shotTakenCount = 0
+shotMadeCount = 0
 
 
 while True:
@@ -175,6 +182,13 @@ while True:
         thickness = int(np.sqrt(dequeLength / float(i + 1)) * 2.5)
         cv2.line(frame, pts[i - 1], pts[i], (0, 0, 255), thickness)
 
+    if not ballCenter == None:
+        IsTakingAShot(ballCenter[0])
+        ShotMade(ballCenter, hoopLocation)
+
+    if shotTaken:
+        cv2.putText(frame, " en train de tirer", (435, 50), cv2.FONT_HERSHEY_SIMPLEX,
+                    0.6, (255, 255, 255), 2)
     # show the frame to our screen
     cv2.imshow("Frame", frame)
 
@@ -188,3 +202,6 @@ while True:
 vs.release()
 # close all windows
 cv2.destroyAllWindows()
+
+print "tirs effectues :" + str(shotTakenCount)
+print "tirs reussis :" + str(shotMadeCount)
