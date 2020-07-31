@@ -128,6 +128,19 @@ def ShotMade(ballCenter, hoopLocation):
     return None
 
 
+def CheckTrajectory(whileCount, ballCenter, pts):
+    if whileCount >= 2 and ballCenter is not None and pts[0] is not None:
+        positionBallonPrec = pts[0]
+        if positionBallonPrec != ballCenter:
+            trajectoireBallon = (pow((ballCenter[1]-positionBallonPrec[1]), 2) +
+                                 pow((ballCenter[0]-positionBallonPrec[0]), 2))**0.5
+            # print abs(trajectoireBallon)
+            # distance maxmimale acceptable entre 2 localisation du ballon
+            if abs(trajectoireBallon) > 140:
+                ballCenter = positionBallonPrec
+    return ballCenter
+
+
 ######################################################################################
 # define the lower and upper boundaries of the "orange"
 # ball in the HSV color space, then initialize the
@@ -152,30 +165,24 @@ hoopLocation = None
 whileCount = 0
 thisShotWasMade = False
 
+fourcc = cv2.VideoWriter_fourcc(*'MJPG')
+out = cv2.VideoWriter("outputVideo.avi", fourcc, 20, (600, 337), True)
+
 while True:
-    # grab the current frame
+    # grab the current frame and handle the frame from VideoCapture
     frame = vs.read()
-    # handle the frame from VideoCapture
     frame = frame[1]
-    # if we are viewing a video and we did not grab a frame,
-    # then we have reached the end of the video
+    # if we are viewing a video and we did not grab a frame,then we have reached the end of the video
     if frame is None:
         break
     hoopLocation = findHoopCenterLocation(frame)
     frame, ballCenter = findBallLocation(frame, orangeLower, orangeUpper)
+    # check trajectory and update the points queue
+    pts.appendleft(CheckTrajectory(whileCount, ballCenter, pts))
 
-    # update the points queue
-
-    if whileCount >= 3 and ballCenter is not None and pts[0] is not None:
-        positionBallonPrec = pts[0]
-        if positionBallonPrec != ballCenter:
-            trajectoireBallon = (pow((ballCenter[1]-positionBallonPrec[1]), 2) +
-                                 pow((ballCenter[0]-positionBallonPrec[0]), 2))**0.5
-            # print abs(trajectoireBallon)
-            if abs(trajectoireBallon) > 120:
-                ballCenter = positionBallonPrec
-
-    pts.appendleft(ballCenter)
+    if not ballCenter == None:
+        IsTakingAShot(ballCenter[0])
+        ShotMade(ballCenter, hoopLocation)
 
     # loop over the set of tracked points
     for i in range(1, len(pts)):
@@ -187,10 +194,6 @@ while True:
         # draw the connecting lines
         thickness = int(np.sqrt(dequeLength / float(i + 1)) * 2.5)
         cv2.line(frame, pts[i - 1], pts[i], (0, 0, 255), thickness)
-
-    if not ballCenter == None:
-        IsTakingAShot(ballCenter[0])
-        ShotMade(ballCenter, hoopLocation)
 
     if shotTaken:
         cv2.putText(frame, " en train de tirer", (425, 50), cv2.FONT_HERSHEY_SIMPLEX,
@@ -207,6 +210,8 @@ while True:
                     0.6, (0, 0, 255), 2)
     cv2.imshow("Frame", frame)
 
+    out.write(frame)
+
     key = cv2.waitKey(1) & 0xFF
 
     # if the 'q' key is pressed, stop the loop
@@ -215,11 +220,14 @@ while True:
 
     whileCount += 1
 
+out.release()
 # release the video/camera
 vs.release()
 # close all windows
 cv2.destroyAllWindows()
 
 
-print "tirs effectues :" + str(shotTakenCount)
-print "tirs reussis :" + str(shotMadeCount)
+print "tirs effectues : " + str(shotTakenCount)
+print "tirs reussis : " + str(shotMadeCount)
+print "pourcentage de reussite : " + \
+    str((float(shotMadeCount)/float(shotTakenCount))*100)
