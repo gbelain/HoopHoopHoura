@@ -3,14 +3,14 @@
 # python ball_tracking.py
 # import the necessary packages
 # list-like data structure for storing the past x,y locations of the ball
-from collections import deque
-from imutils.video import VideoStream
-# install with : $ pip install --upgrade imutils
-import numpy as np
-import argparse
-import cv2
-import imutils
 import time
+import imutils
+import cv2
+import argparse
+import numpy as np
+from imutils.video import VideoStream
+from collections import deque
+# install with : $ pip install --upgrade imutils
 
 ######################################################################################
 
