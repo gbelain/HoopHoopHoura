@@ -56,7 +56,6 @@
 })(jQuery); // End of use strict
 
 ("use strict");
-
 window.addEventListener("load", async (e) => {
     if ("serviceWorker" in navigator) {
         try {
@@ -67,3 +66,28 @@ window.addEventListener("load", async (e) => {
         }
     }
 });
+
+/******************************************************************************** */
+
+function runscript() {
+    alert("I am an alert box!");
+    // if (document.getElementById("script_run").innerHTML == "ONLINE") {
+    //     $.ajax({
+    //         type: "POST",
+    //         url: "main.py",
+    //         data: { offline: "True" },
+    //     }).done(
+    //         setTimeout(function () {
+    //             changebutton();
+    //         }, 50000)
+    //     );
+    // } else {
+    //     $.ajax({
+    //         url: "main.py",
+    //     }).done(
+    //         setTimeout(function () {
+    //             changebutton();
+    //         }, 50000)
+    //     );
+    // }
+}
