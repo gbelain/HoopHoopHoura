@@ -3,8 +3,7 @@ $(function () {
         $.getJSON(
             "/_process_video",
             {
-                a: document.getElementById("aInput").value,
-                b: document.getElementById("bInput").value,
+                // videoName: document.getElementById("aInput").value,
             },
             function (data) {
                 $("#UID_afficheTest").text(data.result);

@@ -146,13 +146,24 @@
                             pourcentage de réussite
                         </p>
                     </div>
+
                     <div class="col-md-4">
-                        <a
-                            id="script_run"
+                        <label for="uploader" class="btn btn-primary"
+                        href="#services">
+                            <span class="fa-stack fa-4x">
+                                <img
+                                    class="img-fluid2"
+                                    src="https://img.icons8.com/all/500/video-record.png"
+                                    alt=""
+                                />
+                            </span>
+                        </label>
+                        </a>
+                        <!-- <a
+                            id="UID_boutonTest"
                             type="button"
                             class="btn btn-primary"
-                            href="#services"
-                            onclick="runscript()"
+                            
                         >
                             <span class="fa-stack fa-4x">
                                 <img
@@ -161,17 +172,14 @@
                                     alt=""
                                 />
                             </span>
-                        </a>
+                        </a> -->
                     </div>
                     <div class="col-md-4">
                         <h5 class="my-3">
                             Lancer l'enregistrement
                         </h5>
                     </div>
-
-                    <h1>The input element</h1>
-
-                    <form>
+                    <!-- <form>
                         <label for="alInput">a:</label>
                         <input
                             type="text"
@@ -184,15 +192,26 @@
                             id="bInput"
                             name="bInput"
                         /><br /><br />
-                    </form>
-                    <button
+                    </form> -->
+                    <!-- <button
                         id="UID_boutonTest"
                         style="left: 50px; height: 50px; width: 200px;"
                     >
                         calculer a+b
-                    </button>
+                    </button> -->
+                    <form action="" method="POST" enctype="multipart/form-data">
+                        <input
+                            type="file"
+                            accept="video"
+                            id="uploader"
+                            name="file"
+                            class="inputfile"
+                        />
+                        <input type="submit" />
+                        <input type="button" id="UID_boutonTest" value="Lancer l'analyse">
+                    </form>
                     <span id="UID_afficheTest" style="text-align: center;"
-                        >MESSAGEDUSERVEUR</span
+                        ></span
                     >
                 </div>
             </div>
