@@ -1,7 +1,7 @@
 $(function () {
     $("#UID_boutonTest").click(function () {
         $.getJSON(
-            "/_add_numbers",
+            "/_process_video",
             {
                 a: document.getElementById("aInput").value,
                 b: document.getElementById("bInput").value,

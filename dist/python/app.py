@@ -1,5 +1,7 @@
 # -*- coding: utf-8 -*-
 from flask import Flask, render_template, request, jsonify
+from ball_tracking import processVideo
+
 # Initialize the Flask application
 app = Flask(__name__)
 
@@ -22,6 +24,13 @@ def add_numbers():
     a = request.args.get('a', 0, type=int)
     b = request.args.get('b', 0, type=int)
     return jsonify(result=a + b)
+
+
+@app.route('/_process_video')
+def process_video():
+    a, b = processVideo("test_video.MOV")
+    return jsonify(result="le resultat final est " +
+                   str(a) + " tirs effectues et " + str(b) + " tir reussis")
 
 # sur requete AJAX _get_message on renvoie le texte
 # je suis la réponse ajax du serveur à + le paramètre transmis

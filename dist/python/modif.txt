@@ -1,8 +1,0 @@
-def processVideo(videoName):    
-
-return shotTakenCount, shotMadeCount
-
-
-a, b = processVideo("test_video.MOV")
-print "le resultat final est " + \
-    str(a) + "tirs effectues et " + str(b) + "tir reussis"

@@ -1,3 +1,4 @@
+# -*- coding: utf-8 -*-
 # USAGE
 # python ball_tracking.py --video ball_tracking_example.mp4
 # python ball_tracking.py
@@ -15,14 +16,14 @@ from collections import deque
 ######################################################################################
 
 
-def findHoopCenterLocation(frame):
+def findHoopCenterLocation(frame, colorLower, colorUpper):
     frameCopy = imutils.resize(frame.copy(), width=600)
     # cv2.imwrite("la frame de base"+'.jpg', frame)
     blurred = cv2.GaussianBlur(frameCopy, (11, 11), 0)
     # cv2.imwrite("la frame blurred"+'.jpg', blurred)
     hsv = cv2.cvtColor(blurred, cv2.COLOR_BGR2HSV)
     # cv2.imwrite("la frame hsv"+'.jpg', hsv)
-    mask = cv2.inRange(hsv, redLower, redUpper)
+    mask = cv2.inRange(hsv, colorLower, colorUpper)
     # cv2.imwrite("le mask"+'.jpg', mask)
     mask = cv2.erode(mask, None, iterations=2)
     mask = cv2.dilate(mask, None, iterations=2)
@@ -64,7 +65,7 @@ def findHoopCenterLocation(frame):
         return None
 
 
-def findBallLocation(frame, orangeLower, orangeUpper):
+def findBallLocation(frame, colorLower, colorUpper):
     # resize the frame, blur it, and convert it to the HSV
     # color space
     frame = imutils.resize(frame, width=600)
@@ -73,7 +74,7 @@ def findBallLocation(frame, orangeLower, orangeUpper):
     # construct a mask for the color "orange", then perform
     # a series of dilations and erosions to remove any small
     # blobs left in the mask
-    mask = cv2.inRange(hsv, orangeLower, orangeUpper)
+    mask = cv2.inRange(hsv, colorLower, colorUpper)
     mask = cv2.erode(mask, None, iterations=2)
     mask = cv2.dilate(mask, None, iterations=2)
     # find contours in the mask and initialize the current
@@ -107,6 +108,8 @@ def IsTakingAShot(xBall):
     global shotTaken
     global shotTakenCount
     global thisShotWasMade
+    global hoopLocation
+
     if xBall < hoopLocation[0]-75:
         if not shotTaken:
             shotTaken = True
@@ -141,7 +144,7 @@ def CheckTrajectory(whileCount, ballCenter, pts):
     return ballCenter
 
 
-def DisplayTrackingOnFrame(pts, shotTaken, thisShotWasMade, hoopLocation, frame):
+def DisplayTrackingOnFrame(pts, shotTaken, thisShotWasMade, hoopLocation, frame, dequeLength):
     # loop over the set of tracked points
     for i in range(1, len(pts)):
         # if either of the tracked points are None, ignore
@@ -173,64 +176,84 @@ def DisplayTrackingOnFrame(pts, shotTaken, thisShotWasMade, hoopLocation, frame)
 # define the lower and upper boundaries of the "orange"
 # ball in the HSV color space, then initialize the
 # list of tracked points
-orangeLower = (7, 100, 20)
-orangeUpper = (22, 250, 255)
-
-redLower = (0, 100, 20)
-redUpper = (10, 255, 255)
-
-dequeLength = 20
 videoName = "test_video.MOV"
 
-vs = cv2.VideoCapture(videoName)
-time.sleep(2.0)
-
-pts = deque(maxlen=dequeLength)
 shotTaken = False
 shotTakenCount = 0
 shotMadeCount = 0
 hoopLocation = None
-whileCount = 0
 thisShotWasMade = False
 
-# fourcc = cv2.VideoWriter_fourcc(*'MJPG')
-# out = cv2.VideoWriter("outputVideo.avi", fourcc, 20, (600, 337), True)
 
-while True:
-    # grab the current frame and handle the frame from VideoCapture
-    frame = vs.read()
-    frame = frame[1]
-    # if we are viewing a video and we did not grab a frame,then we have reached the end of the video
-    if frame is None:
-        break
-    hoopLocation = findHoopCenterLocation(frame)
-    frame, ballCenter = findBallLocation(frame, orangeLower, orangeUpper)
-    # check trajectory and update the points queue
-    pts.appendleft(CheckTrajectory(whileCount, ballCenter, pts))
+def processVideo(videoName):
+    """paramètres : le nom de la vidéo || retour : le nombre de tirs effectués, le nombre de paniers marqués dans la vidéo"""
+    orangeLower = (7, 100, 20)
+    orangeUpper = (22, 250, 255)
 
-    if not ballCenter == None:
-        IsTakingAShot(ballCenter[0])
-        ShotMade(ballCenter, hoopLocation)
+    redLower = (0, 100, 20)
+    redUpper = (10, 255, 255)
 
-    frame = DisplayTrackingOnFrame(
-        pts, shotTaken, thisShotWasMade, hoopLocation, frame)
+    dequeLength = 20
 
-    cv2.imshow("Frame", frame)
-    # out.write(frame)
-    whileCount += 1
-    # if the 'q' key is pressed, stop the loop
-    key = cv2.waitKey(1) & 0xFF
-    if key == ord("q"):
-        break
+    vs = cv2.VideoCapture(videoName)
+    time.sleep(2.0)
 
-# out.release()
-# release the video/camera
-vs.release()
-# close all windows
-cv2.destroyAllWindows()
+    pts = deque(maxlen=dequeLength)
+    global shotTaken
+    global shotTakenCount
+    global shotMadeCount
+    global hoopLocation
+    global thisShotWasMade
+    shotTaken = False
+    shotTakenCount = 0
+    shotMadeCount = 0
+    hoopLocation = None
+    thisShotWasMade = False
+    whileCount = 0
+
+    # fourcc = cv2.VideoWriter_fourcc(*'MJPG')
+    # out = cv2.VideoWriter("outputVideo.avi", fourcc, 20, (600, 337), True)
+
+    while True:
+        # grab the current frame and handle the frame from VideoCapture
+        frame = vs.read()
+        frame = frame[1]
+        # if we are viewing a video and we did not grab a frame,then we have reached the end of the video
+        if frame is None:
+            break
+        hoopLocation = findHoopCenterLocation(frame, redLower, redUpper)
+        frame, ballCenter = findBallLocation(frame, orangeLower, orangeUpper)
+        # check trajectory and update the points queue
+        pts.appendleft(CheckTrajectory(whileCount, ballCenter, pts))
+
+        if not ballCenter == None:
+            IsTakingAShot(ballCenter[0])
+            ShotMade(ballCenter, hoopLocation)
+
+        # frame = DisplayTrackingOnFrame(
+        #     pts, shotTaken, thisShotWasMade, hoopLocation, frame, dequeLength)
+
+        #cv2.imshow("Frame", frame)
+        # out.write(frame)
+        whileCount += 1
+        # if the 'q' key is pressed, stop the loop
+        key = cv2.waitKey(1) & 0xFF
+        if key == ord("q"):
+            break
+
+    # out.release()
+    # release the video/camera
+    vs.release()
+    # close all windows
+    cv2.destroyAllWindows()
+
+    print "tirs effectues : " + str(shotTakenCount)
+    print "tirs reussis : " + str(shotMadeCount)
+    # print "pourcentage de reussite : " + \
+    #     str((float(shotMadeCount)/float(shotTakenCount))*100)
+    return shotTakenCount, shotMadeCount
 
 
-print "tirs effectues : " + str(shotTakenCount)
-print "tirs reussis : " + str(shotMadeCount)
-# print "pourcentage de reussite : " + \
-#     str((float(shotMadeCount)/float(shotTakenCount))*100)
+# a, b = processVideo("test_video.MOV")
+# print "le resultat final est " + \
+#     str(a) + "tirs effectues et " + str(b) + "tir reussis"
