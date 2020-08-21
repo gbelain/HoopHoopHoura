@@ -1,18 +1,4 @@
 # -*- coding: utf-8 -*-
-# from flask import Flask, render_template
-# app = Flask(__name__)
-
-
-# @app.route("/")
-# def hello():
-#     return render_template("test.html")
-
-
-# if __name__ == "__main__":
-#     app.run(debug=True)
-
-
-###############################################################
 from flask import Flask, render_template, request, jsonify
 # Initialize the Flask application
 app = Flask(__name__)
@@ -24,7 +10,7 @@ app = Flask(__name__)
 
 @app.route('/')
 def index():
-    return render_template('test.html')
+    return render_template('index.html')
 
 # Route that will process the AJAX request, sum up two
 # integer numbers (defaulted to zero) and return the

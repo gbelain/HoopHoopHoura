@@ -4,23 +4,7 @@
         <meta charset="utf-8" />
         <title>Test Guillaume</title>
         <script src="//ajax.googleapis.com/ajax/libs/jquery/1.9.1/jquery.min.js"></script>
-        <script type="text/javascript">
-            $(function () {
-                $("#UID_boutonTest").click(function () {
-                    $.getJSON(
-                        "/_add_numbers",
-                        {
-                            a: document.getElementById("aInput").value,
-                            b: document.getElementById("bInput").value,
-                        },
-                        function (data) {
-                            $("#UID_afficheTest").text(data.result);
-                        }
-                    );
-                    return false;
-                });
-            });
-        </script>
+        <script src="/static/test.js"></script>
     </head>
     <body>
         <h1>The input element</h1>

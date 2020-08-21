@@ -9,13 +9,28 @@
         <meta name="description" content="" />
         <meta name="author" content="" />
         <title>HoopHoopHoura</title>
-        <link rel="icon" type="image/x-icon" href="assets/img/favicon.ico" />
+        <link
+            rel="icon"
+            type="image/x-icon"
+            href="/static/assets/img/favicon.ico"
+        />
         <!-- Font Awesome icons (free version)-->
+        <script src="//ajax.googleapis.com/ajax/libs/jquery/1.9.1/jquery.min.js"></script>
         <script
             src="https://use.fontawesome.com/releases/v5.13.0/js/all.js"
             crossorigin="anonymous"
         ></script>
-        <link rel="manifest" href="manifest.json" />
+        <!-- Bootstrap core JS-->
+        <script src="https://cdnjs.cloudflare.com/ajax/libs/jquery/3.5.1/jquery.min.js"></script>
+        <script src="https://stackpath.bootstrapcdn.com/bootstrap/4.5.0/js/bootstrap.bundle.min.js"></script>
+        <!-- Third party plugin JS-->
+        <script src="https://cdnjs.cloudflare.com/ajax/libs/jquery-easing/1.4.1/jquery.easing.min.js"></script>
+        <!-- Contact form JS-->
+        <script src="/static/assets/mail/jqBootstrapValidation.js"></script>
+        <script src="/static/assets/mail/contact_me.js"></script>
+        <!-- Core theme JS-->
+        <script src="/static/scripts.js"></script>
+        <link rel="manifest" href="../../../manifest.json" />
         <!-- Google fonts-->
         <link
             href="https://fonts.googleapis.com/css?family=Montserrat:400,700"
@@ -33,7 +48,7 @@
             type="text/css"
         />
         <!-- Core theme CSS (includes Bootstrap)-->
-        <link href="css/styles.css" rel="stylesheet" />
+        <link rel="stylesheet" type="text/css" href="/static/styles.css" />
     </head>
     <body id="page-top">
         <!-- Navigation-->
@@ -121,7 +136,7 @@
                     <div class="col-md-4">
                         <img
                             class="img-fluid"
-                            src="assets/img/Capture.PNG"
+                            src="/static/assets/img/Capture.PNG"
                             alt=""
                         />
                         <p class="text-muted">
@@ -153,6 +168,32 @@
                             Lancer l'enregistrement
                         </h5>
                     </div>
+
+                    <h1>The input element</h1>
+
+                    <form>
+                        <label for="alInput">a:</label>
+                        <input
+                            type="text"
+                            id="aInput"
+                            name="aInput"
+                        /><br /><br />
+                        <label for="blInput">b:</label>
+                        <input
+                            type="text"
+                            id="bInput"
+                            name="bInput"
+                        /><br /><br />
+                    </form>
+                    <button
+                        id="UID_boutonTest"
+                        style="left: 50px; height: 50px; width: 200px;"
+                    >
+                        calculer a+b
+                    </button>
+                    <span id="UID_afficheTest" style="text-align: center;"
+                        >MESSAGEDUSERVEUR</span
+                    >
                 </div>
             </div>
         </section>
@@ -174,16 +215,5 @@
                 </div>
             </div>
         </footer>
-
-        <!-- Bootstrap core JS-->
-        <script src="https://cdnjs.cloudflare.com/ajax/libs/jquery/3.5.1/jquery.min.js"></script>
-        <script src="https://stackpath.bootstrapcdn.com/bootstrap/4.5.0/js/bootstrap.bundle.min.js"></script>
-        <!-- Third party plugin JS-->
-        <script src="https://cdnjs.cloudflare.com/ajax/libs/jquery-easing/1.4.1/jquery.easing.min.js"></script>
-        <!-- Contact form JS-->
-        <script src="assets/mail/jqBootstrapValidation.js"></script>
-        <script src="assets/mail/contact_me.js"></script>
-        <!-- Core theme JS-->
-        <script src="js/scripts.js"></script>
     </body>
 </html>

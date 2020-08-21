@@ -193,8 +193,8 @@ hoopLocation = None
 whileCount = 0
 thisShotWasMade = False
 
-fourcc = cv2.VideoWriter_fourcc(*'MJPG')
-out = cv2.VideoWriter("outputVideo.avi", fourcc, 20, (600, 337), True)
+# fourcc = cv2.VideoWriter_fourcc(*'MJPG')
+# out = cv2.VideoWriter("outputVideo.avi", fourcc, 20, (600, 337), True)
 
 while True:
     # grab the current frame and handle the frame from VideoCapture
@@ -216,14 +216,14 @@ while True:
         pts, shotTaken, thisShotWasMade, hoopLocation, frame)
 
     cv2.imshow("Frame", frame)
-    out.write(frame)
+    # out.write(frame)
     whileCount += 1
     # if the 'q' key is pressed, stop the loop
     key = cv2.waitKey(1) & 0xFF
     if key == ord("q"):
         break
 
-out.release()
+# out.release()
 # release the video/camera
 vs.release()
 # close all windows
@@ -232,5 +232,5 @@ cv2.destroyAllWindows()
 
 print "tirs effectues : " + str(shotTakenCount)
 print "tirs reussis : " + str(shotMadeCount)
-print "pourcentage de reussite : " + \
-    str((float(shotMadeCount)/float(shotTakenCount))*100)
+# print "pourcentage de reussite : " + \
+#     str((float(shotMadeCount)/float(shotTakenCount))*100)

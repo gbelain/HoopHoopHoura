@@ -1,3 +1,19 @@
+$(function () {
+    $("#UID_boutonTest").click(function () {
+        $.getJSON(
+            "/_add_numbers",
+            {
+                a: document.getElementById("aInput").value,
+                b: document.getElementById("bInput").value,
+            },
+            function (data) {
+                $("#UID_afficheTest").text(data.result);
+            }
+        );
+        return false;
+    });
+});
+
 (function ($) {
     "use strict"; // Start of use strict
 
@@ -49,3 +65,40 @@
     // Collapse the navbar when page is scrolled
     $(window).scroll(navbarCollapse);
 })(jQuery); // End of use strict
+
+("use strict");
+window.addEventListener("load", async (e) => {
+    if ("serviceWorker" in navigator) {
+        try {
+            navigator.serviceWorker.register("sw.js");
+            console.log("SW registered");
+        } catch (error) {
+            console.log("SW registration failed");
+        }
+    }
+});
+
+/******************************************************************************** */
+
+function runscript() {
+    alert("j'aimerais que ça marche putain!");
+    // if (document.getElementById("script_run").innerHTML == "ONLINE") {
+    //     $.ajax({
+    //         type: "POST",
+    //         url: "main.py",
+    //         data: { offline: "True" },
+    //     }).done(
+    //         setTimeout(function () {
+    //             changebutton();
+    //         }, 50000)
+    //     );
+    // } else {
+    //     $.ajax({
+    //         url: "main.py",
+    //     }).done(
+    //         setTimeout(function () {
+    //             changebutton();
+    //         }, 50000)
+    //     );
+    // }
+}
