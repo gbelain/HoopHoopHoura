@@ -1,17 +1,25 @@
 # -*- coding: utf-8 -*-
-# USAGE
-# python ball_tracking.py --video ball_tracking_example.mp4
-# python ball_tracking.py
-# import the necessary packages
-# list-like data structure for storing the past x,y locations of the ball
 import time
 import imutils
+from imutils.video import VideoStream
+from imutils.video import FileVideoStream
+from imutils.video import FPS
+from threading import Thread
+import sys
 import cv2
 import argparse
 import numpy as np
-from imutils.video import VideoStream
 from collections import deque
+from Queue import Queue
 # install with : $ pip install --upgrade imutils
+
+######################################################################################
+videoName = "test_video.MOV"
+shotTaken = False
+shotTakenCount = 0
+shotMadeCount = 0
+hoopLocation = None
+thisShotWasMade = False
 
 ######################################################################################
 
@@ -54,12 +62,15 @@ def findHoopCenterLocation(frame, colorLower, colorUpper):
         M = cv2.moments(circleContour)
         cX = int(M["m10"] / M["m00"])
         cY = int(M["m01"] / M["m00"])
-        # cv2.drawContours(frame, [circleContour], -1, (0, 255, 0), 2)
-        # cv2.circle(frame, (cX+16, cY-14), 3, (255, 255, 255), -1)
-        # # show the image
-        # cv2.imshow("les contours", frame)
-        # cv2.waitKey(0)
-        return (cX+16, cY-14)
+        cv2.drawContours(frameCopy, [circleContour], -1, (0, 255, 0), 2)
+        cv2.circle(frameCopy, (cX, cY), 3, (255, 255, 255), -1)
+        # show the image
+        cv2.imshow("les contours", frameCopy)
+        cv2.waitKey(0)
+        if cY > 167:
+            return (cX+19, cY-12)
+        else:
+            return (cX+19, cY+12)
     else:
         print "pas de contour trouve"
         return None
@@ -110,21 +121,22 @@ def IsTakingAShot(xBall):
     global thisShotWasMade
     global hoopLocation
 
-    if xBall < hoopLocation[0]-75:
+    if xBall < hoopLocation[0]-45:  # c'était à 75
         if not shotTaken:
             shotTaken = True
             shotTakenCount += 1
-    elif xBall > hoopLocation[0]+60:
+    elif xBall > hoopLocation[0]+40:
+        thisShotWasMade = False
         if shotTaken:
             shotTaken = False
-            thisShotWasMade = False
+            #thisShotWasMade = False
     return None
 
 
 def ShotMade(ballCenter, hoopLocation):
     global shotMadeCount
     global thisShotWasMade
-    if (ballCenter[1] > hoopLocation[1]-13 and ballCenter[1] < hoopLocation[1]+13) and (ballCenter[0] > hoopLocation[0]-4 and ballCenter[0] < hoopLocation[0]+10) and not thisShotWasMade:
+    if (ballCenter[1] > hoopLocation[1]-10 and ballCenter[1] < hoopLocation[1]+10) and (ballCenter[0] > hoopLocation[0]-4 and ballCenter[0] < hoopLocation[0]+10) and not thisShotWasMade:
         shotMadeCount += 1
         thisShotWasMade = True
         print "panier marque"
@@ -139,7 +151,7 @@ def CheckTrajectory(whileCount, ballCenter, pts):
                                  pow((ballCenter[0]-positionBallonPrec[0]), 2))**0.5
             # print abs(trajectoireBallon)
             # distance maxmimale acceptable entre 2 localisation du ballon
-            if abs(trajectoireBallon) > 140:
+            if abs(trajectoireBallon) > 130:
                 ballCenter = positionBallonPrec
     return ballCenter
 
@@ -162,41 +174,34 @@ def DisplayTrackingOnFrame(pts, shotTaken, thisShotWasMade, hoopLocation, frame,
     # show the frame to our screen
     cv2.line(frame, (hoopLocation[0], hoopLocation[1]-13),
              (hoopLocation[0], hoopLocation[1]+13), (255, 0, 0), 5)
-    # cv2.line(frame, (hoopLocation[0]-75, 1),
-    #          (hoopLocation[0]-75, 500), (0, 0, 255), 2)
-    # cv2.line(frame, (hoopLocation[0]+60, 1),
-    #  (hoopLocation[0]+60, 500), (0, 0, 255), 2)
+    cv2.line(frame, (hoopLocation[0]-45, 1),
+             (hoopLocation[0]-45, 500), (0, 0, 255), 2)  # à baisser
+    cv2.line(frame, (hoopLocation[0]+60, 1),
+             (hoopLocation[0]+60, 500), (0, 0, 255), 2)
     if thisShotWasMade:
         cv2.putText(frame, "PANIER MARQUE !!", (420, 70), cv2.FONT_HERSHEY_SIMPLEX,
                     0.6, (0, 0, 255), 2)
     return frame
 
 
-######################################################################################
-# define the lower and upper boundaries of the "orange"
-# ball in the HSV color space, then initialize the
-# list of tracked points
-videoName = "test_video.MOV"
-
-shotTaken = False
-shotTakenCount = 0
-shotMadeCount = 0
-hoopLocation = None
-thisShotWasMade = False
-
-
 def processVideo(videoName):
     """paramètres : le nom de la vidéo || retour : le nombre de tirs effectués, le nombre de paniers marqués dans la vidéo"""
     orangeLower = (7, 100, 20)
-    orangeUpper = (22, 250, 255)
+    orangeUpper = (13, 250, 255)
 
     redLower = (0, 100, 20)
     redUpper = (10, 255, 255)
 
     dequeLength = 20
 
-    vs = cv2.VideoCapture(videoName)
-    time.sleep(2.0)
+    # start the file video stream thread and allow the buffer to
+    # start to fill
+    print("[INFO] starting video file thread...")
+    fvs = FileVideoStream(videoName).start()
+    time.sleep(1.0)
+    fps = FPS().start()
+
+    # vs = cv2.VideoCapture(videoName)
 
     pts = deque(maxlen=dequeLength)
     global shotTaken
@@ -214,15 +219,19 @@ def processVideo(videoName):
     # fourcc = cv2.VideoWriter_fourcc(*'MJPG')
     # out = cv2.VideoWriter("outputVideo.avi", fourcc, 20, (600, 337), True)
 
-    while True:
+    while fvs.more():
+
         # grab the current frame and handle the frame from VideoCapture
-        frame = vs.read()
-        frame = frame[1]
+        frame = fvs.read()
+        # frame = frame[1]
         # if we are viewing a video and we did not grab a frame,then we have reached the end of the video
         if frame is None:
             break
+        # on analyse une frame sur 2
+        # if (whileCount % 2) == 0:
         hoopLocation = findHoopCenterLocation(frame, redLower, redUpper)
-        frame, ballCenter = findBallLocation(frame, orangeLower, orangeUpper)
+        frame, ballCenter = findBallLocation(
+            frame, orangeLower, orangeUpper)
         # check trajectory and update the points queue
         pts.appendleft(CheckTrajectory(whileCount, ballCenter, pts))
 
@@ -230,10 +239,12 @@ def processVideo(videoName):
             IsTakingAShot(ballCenter[0])
             ShotMade(ballCenter, hoopLocation)
 
-        # frame = DisplayTrackingOnFrame(
-        #     pts, shotTaken, thisShotWasMade, hoopLocation, frame, dequeLength)
+        frame = DisplayTrackingOnFrame(
+            pts, shotTaken, thisShotWasMade, hoopLocation, frame, dequeLength)
 
-        #cv2.imshow("Frame", frame)
+        cv2.imshow("Frame", frame)
+        # fin du if ici
+        fps.update()
         # out.write(frame)
         whileCount += 1
         # if the 'q' key is pressed, stop the loop
@@ -243,7 +254,11 @@ def processVideo(videoName):
 
     # out.release()
     # release the video/camera
-    vs.release()
+    fvs.stop()
+    # stop the timer and display FPS information
+    fps.stop()
+    print("[INFO] elapsed time: {:.2f}".format(fps.elapsed()))
+    print("[INFO] approx. FPS: {:.2f}".format(fps.fps()))
     # close all windows
     cv2.destroyAllWindows()
 
@@ -253,7 +268,9 @@ def processVideo(videoName):
     #     str((float(shotMadeCount)/float(shotTakenCount))*100)
     return shotTakenCount, shotMadeCount
 
+######################################################################################
 
-# a, b = processVideo("test_video.MOV")
-# print "le resultat final est " + \
-#     str(a) + "tirs effectues et " + str(b) + "tir reussis"
+
+a, b = processVideo("test_video5.MOV")
+print "le resultat final est " + \
+    str(a) + " tirs effectues et " + str(b) + " tirs reussis"
