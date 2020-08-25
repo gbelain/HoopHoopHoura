@@ -29,23 +29,20 @@ def add_numbers():
 @app.route('/_process_video')
 def process_video():
     a, b = processVideo(videoName)
-    if a > 0 and b > 0:
-        pourcentageR = (float(b)/float(a))*100
-    else:
-        pourcentageR = 0
-    return jsonify(result="Votre pourcentage de réussite est " + str(round(pourcentageR, 2)) + "% avec " + str(a) + " tirs effectués et " + str(b) + " tirs reussis")
+    return jsonify(result="le resultat final est " +
+                   str(a) + " tirs effectués et " + str(b) + " tir reussis")
 
 # sur requete AJAX _get_message on renvoie le texte
 # je suis la réponse ajax du serveur à + le paramètre transmis
 
 
-@ app.route('/_get_message')
+@app.route('/_get_message')
 def get_message():
     param = request.args.get('param', 'pas de param', type=str)
     return jsonify(result='je suis la réponse ajax du serveur à ' + param)
 
 
-@ app.route('/', methods=['POST'])
+@app.route('/', methods=['POST'])
 def upload_file():
     global videoName
     uploaded_file = request.files['file']
