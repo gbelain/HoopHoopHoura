@@ -76,28 +76,3 @@ window.addEventListener("load", async (e) => {
         }
     }
 });
-
-/******************************************************************************** */
-
-function runscript() {
-    alert("j'aimerais que ça marche putain!");
-    // if (document.getElementById("script_run").innerHTML == "ONLINE") {
-    //     $.ajax({
-    //         type: "POST",
-    //         url: "main.py",
-    //         data: { offline: "True" },
-    //     }).done(
-    //         setTimeout(function () {
-    //             changebutton();
-    //         }, 50000)
-    //     );
-    // } else {
-    //     $.ajax({
-    //         url: "main.py",
-    //     }).done(
-    //         setTimeout(function () {
-    //             changebutton();
-    //         }, 50000)
-    //     );
-    // }
-}
