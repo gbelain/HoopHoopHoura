@@ -34,7 +34,7 @@ def findHoopCenterLocation(frame, colorLower, colorUpper):
 
     # only proceed if at least one contour was found
     if len(cnts) > 0:
-        # contour du panneau
+        # backboard contour
         circleContour = None
         circleContour = max(cnts, key=cv2.contourArea)
 
@@ -103,7 +103,7 @@ def IsTakingAShot(xBall):
     global thisShotWasMade
     global hoopLocation
 
-    if xBall < hoopLocation[0]-45:  # c'était à 75
+    if xBall < hoopLocation[0]-45:
         if not shotTaken:
             shotTaken = True
             shotTakenCount += 1
@@ -130,7 +130,7 @@ def CheckTrajectory(whileCount, ballCenter, pts):
         if positionBallonPrec != ballCenter:
             trajectoireBallon = (pow((ballCenter[1]-positionBallonPrec[1]), 2) +
                                  pow((ballCenter[0]-positionBallonPrec[0]), 2))**0.5
-            # distance maxmimale acceptable entre 2 localisation du ballon
+            # checking maximum acceptable distance between 2 consecutive ball locations
             if abs(trajectoireBallon) > 130:
                 ballCenter = positionBallonPrec
     return ballCenter
@@ -166,11 +166,11 @@ def DisplayTrackingOnFrame(pts, shotTaken, thisShotWasMade, hoopLocation, frame,
 
 def processVideo(videoName):
     """paramètres : le nom de la vidéo || retour : le nombre de tirs effectués, le nombre de paniers marqués dans la vidéo"""
-    # fourchette de couleur du ballon
+    # ball color ranging
     orangeLower = (8, 100, 20)
     orangeUpper = (13, 250, 255)
 
-    # fourchette de couleur du panneau
+    # backboard color ranging
     redLower = (0, 100, 20)
     redUpper = (10, 255, 255)
 
@@ -203,7 +203,7 @@ def processVideo(videoName):
         # if we are viewing a video and we did not grab a frame,then we have reached the end of the video
         if frame is None:
             break
-        # on analyse une frame sur 2
+        # one every two frames is processed
         if (whileCount % 2) == 0:
             hoopLocation = findHoopCenterLocation(frame, redLower, redUpper)
             frame, ballCenter = findBallLocation(
@@ -243,7 +243,6 @@ def processVideo(videoName):
     return shotTakenCount, shotMadeCount
 
 ######################################################################################
-
 
 # a, b = processVideo("test_video.MOV")
 # print "le resultat final est " + \
